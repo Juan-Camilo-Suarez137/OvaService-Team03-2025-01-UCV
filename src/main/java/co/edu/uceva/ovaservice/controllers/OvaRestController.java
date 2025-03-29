@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/vv1/OvaService")
+@RequestMapping("/api/v1/OvaService")
 public class OvaRestController {
 
     // Inyección de dependencia del servicio que proporciona servicios de CRUD
