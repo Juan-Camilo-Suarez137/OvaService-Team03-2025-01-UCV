@@ -4,6 +4,8 @@ package co.edu.uceva.ovaservice.controllers;
 import co.edu.uceva.ovaservice.models.entities.Ova;
 import co.edu.uceva.ovaservice.models.services.IOvaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,11 +19,20 @@ public class OvaRestController {
 
     // Inyección de dependencia del servicio que proporciona servicios de CRUD
     @Autowired
-    public OvaRestController(IOvaService ovaService) {this.ovaService = ovaService;}
+    public OvaRestController(IOvaService ovaService) {
+        this.ovaService = ovaService;
+    }
 
     // Metodo que retorna todos los productos
     @GetMapping("/ova")
     public List<Ova> getOva() {return ovaService.findAll();}
+
+    // Metodo que retorna todos los productos paginados
+    @GetMapping("/ova/page/{page}")
+    public List<Ova> index(@PathVariable Integer page) {
+        Pageable pageable = PageRequest.of(page, 4);
+        return ovaService.findAll(pageable);
+    }
 
     // Metodo que guarda un producto pasandolo por el cuerpo de la petición
     @PostMapping("/ova")
