@@ -1,8 +1,7 @@
-package co.edu.uceva.ovaservice.models.repositories;
+package co.edu.uceva.ovaservice.domain.repository;
 
-import co.edu.uceva.ovaservice.models.entities.Ova;
+import co.edu.uceva.ovaservice.domain.model.Ova;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.CrudRepository;
 
 /**
  * Interface que hereda de JpaRepository para realizar las

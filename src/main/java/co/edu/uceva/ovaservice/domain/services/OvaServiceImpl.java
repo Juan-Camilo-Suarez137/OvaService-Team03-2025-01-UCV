@@ -1,7 +1,7 @@
-package co.edu.uceva.ovaservice.models.services;
+package co.edu.uceva.ovaservice.domain.services;
 
-import co.edu.uceva.ovaservice.models.entities.Ova;
-import co.edu.uceva.ovaservice.models.repositories.IOvaRepository;
+import co.edu.uceva.ovaservice.domain.model.Ova;
+import co.edu.uceva.ovaservice.domain.repository.IOvaRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

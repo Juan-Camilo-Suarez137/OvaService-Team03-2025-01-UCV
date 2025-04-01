@@ -1,8 +1,8 @@
 package co.edu.uceva.ovaservice.controllers;
 
 
-import co.edu.uceva.ovaservice.models.entities.Ova;
-import co.edu.uceva.ovaservice.models.services.IOvaService;
+import co.edu.uceva.ovaservice.domain.model.Ova;
+import co.edu.uceva.ovaservice.domain.services.IOvaService;
 import jakarta.validation.Valid;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;

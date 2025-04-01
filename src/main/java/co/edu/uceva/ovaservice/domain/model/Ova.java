@@ -1,11 +1,8 @@
-package co.edu.uceva.ovaservice.models.entities;
+package co.edu.uceva.ovaservice.domain.model;
 
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
