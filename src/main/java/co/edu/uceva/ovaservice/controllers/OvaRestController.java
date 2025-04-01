@@ -3,12 +3,14 @@ package co.edu.uceva.ovaservice.controllers;
 
 import co.edu.uceva.ovaservice.models.entities.Ova;
 import co.edu.uceva.ovaservice.models.services.IOvaService;
+import jakarta.validation.Valid;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -81,8 +83,18 @@ public class OvaRestController {
     }
 
     @PostMapping("/ovas")
-    public ResponseEntity<Map<String, Object>> save(@RequestBody Ova ova) {
+    public ResponseEntity<Map<String, Object>> save(@Valid @RequestBody Ova ova, BindingResult result) {
         Map<String, Object> response = new HashMap<>();
+
+        if (result.hasErrors()) {
+            List<String> errors = result.getFieldErrors()
+                    .stream()
+                    .map(err -> "El campo '" + err.getField() + "' " + err.getDefaultMessage())
+                    .toList();
+
+            response.put("errors", errors);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
 
         try {
             Ova nuevoOva = ovaService.save(ova);
@@ -117,8 +129,18 @@ public class OvaRestController {
     }
 
     @PutMapping("/ovas")
-    public ResponseEntity<Map<String, Object>> update(@RequestBody Ova ova) {
+    public ResponseEntity<Map<String, Object>> update(@Valid @RequestBody Ova ova, BindingResult result) {
         Map<String, Object> response = new HashMap<>();
+
+        if (result.hasErrors()) {
+            List<String> errors = result.getFieldErrors()
+                    .stream()
+                    .map(err -> "El campo '" + err.getField() + "' " + err.getDefaultMessage())
+                    .toList();
+
+            response.put("errors", errors);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
 
         try {
             if (ovaService.findById(ova.getId()) == null) {
