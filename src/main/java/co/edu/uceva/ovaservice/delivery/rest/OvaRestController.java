@@ -1,4 +1,4 @@
-package co.edu.uceva.ovaservice.controllers;
+package co.edu.uceva.ovaservice.delivery.rest;
 
 
 import co.edu.uceva.ovaservice.domain.model.Ova;
