@@ -1,6 +1,10 @@
 package co.edu.uceva.ovaservice.delivery.rest;
 
 
+import co.edu.uceva.ovaservice.domain.exception.NoHayOvasException;
+import co.edu.uceva.ovaservice.domain.exception.PaginaSinOvasException;
+import co.edu.uceva.ovaservice.domain.exception.OvaNoEncontradoException;
+import co.edu.uceva.ovaservice.domain.exception.ValidationException;
 import co.edu.uceva.ovaservice.domain.model.Ova;
 import co.edu.uceva.ovaservice.domain.services.IOvaService;
 import jakarta.validation.Valid;
@@ -24,160 +28,88 @@ public class OvaRestController {
     // Declaramos como final el servicio para mejorar la inmutabilidad
     private final IOvaService ovaService;
 
-    private static final String ERROR = "error";
+    // Constantes para los mensajes de respuesta
     private static final String MENSAJE = "mensaje";
     private static final String OVA = "ova";
     private static final String OVAS = "ovas";
 
 
     // Inyección de dependencia del servicio que proporciona servicios de CRUD
-    public OvaRestController(IOvaService ovaService) {
-
-        this.ovaService = ovaService;
-    }
+    public OvaRestController(IOvaService ovaService) {this.ovaService = ovaService;}
 
     @GetMapping("/ova")
     public ResponseEntity<Map<String, Object>> getOvas(){
-        Map<String, Object> response = new HashMap<>();
+        List<Ova> ovas = ovaService.findAll();
 
-        try {
-            List<Ova> ovas = ovaService.findAll();
-
-            if (ovas.isEmpty()) {
-                response.put(MENSAJE, "No hay ovas en la base de datos.");
-                response.put(OVAS, ovas);
-                return ResponseEntity.status(HttpStatus.OK).body(response);
-            }
-            response.put(OVAS, ovas);
-            return ResponseEntity.ok(response);
-        } catch (DataAccessException e) {
-            response.put(MENSAJE, "Error al consultar la base de datos.");
-            response.put(ERROR, e.getMessage().concat(":").concat(e.getMostSpecificCause().getMessage()));
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        if (ovas.isEmpty()) {
+            throw new NoHayOvasException();
         }
-
+        Map<String, Object> response = new HashMap<>();
+        response.put(OVAS , ovas);
+        return ResponseEntity.ok(response);
     }
 
-    // Metodo que retorna todos los productos paginados
-    @GetMapping("/ova/page/{page}")
-    public ResponseEntity<Object> index(@PathVariable Integer page) {
-        Map<String, Object> response = new HashMap<>();
-        Pageable pageable = PageRequest.of(page, 4);
-        try {
-            Page<Ova> ovas = ovaService.findAll(pageable);
 
-            if (ovas.isEmpty()) {
-                response.put(MENSAJE, "No hay ovas en la pagina solicitada.");
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-            }
 
-            return ResponseEntity.ok(ovas);
-        } catch (DataAccessException e) {
-            response.put(MENSAJE, "Error al consultar la pagina de datos.");
-            response.put(ERROR, e.getMessage().concat(":").concat(e.getMostSpecificCause().getMessage()));
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        } catch (IllegalArgumentException e){
-            response.put(MENSAJE, "Numero de paginas invalida.");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-        }
+
+// Metodo que retorna todos los productos paginados
+@GetMapping("/ova/page/{page}")
+public ResponseEntity<Object> index(@PathVariable Integer page) {
+    Pageable pageable = PageRequest.of(page, 4);
+    Page<Ova> ovas = ovaService.findAll(pageable);
+    if (ovas.isEmpty()) {
+        throw new PaginaSinOvasException(page);
+    }
+    return ResponseEntity.ok(ovas);
+}
+
+@PostMapping("/ovas")
+public ResponseEntity<Map<String, Object>> save(@Valid @RequestBody Ova ova, BindingResult result) {
+    if (result.hasErrors()) {
+        throw new ValidationException(result);
+    }
+    Map<String, Object> response = new HashMap<>();
+    Ova nuevoOva = ovaService.save(ova);
+    response.put(MENSAJE, "El ova ha sido creado con exito!" );
+    response.put(OVA, nuevoOva);
+    return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PostMapping("/ovas")
-    public ResponseEntity<Map<String, Object>> save(@Valid @RequestBody Ova ova, BindingResult result) {
-        Map<String, Object> response = new HashMap<>();
 
-        if (result.hasErrors()) {
-            List<String> errors = result.getFieldErrors()
-                    .stream()
-                    .map(err -> "El campo '" + err.getField() + "' " + err.getDefaultMessage())
-                    .toList();
+@DeleteMapping("/ovas")
+public ResponseEntity<Map<String, Object>> delete(@RequestBody Ova ova) {
+   ovaService.findById(ova.getId())
+      .orElseThrow(() -> new OvaNoEncontradoException(ova.getId()));
+    ovaService.delete(ova);
+    Map<String, Object> response = new HashMap<>();
+    response.put(MENSAJE, "El ova ha sido eliminado con exito!" );
+    response.put(OVA, null);
+    return ResponseEntity.ok(response);
+}
 
-            response.put("errors", errors);
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-        }
-
-        try {
-            Ova nuevoOva = ovaService.save(ova);
-
-            response.put(MENSAJE, "El Nuevo ova ha sido creado con exito.");
-            response.put(OVAS, nuevoOva);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (DataAccessException e) {
-            response.put(MENSAJE, "Error al insertar el ova en la base de datos.");
-            response.put(ERROR, e.getMessage().concat(":").concat(e.getMostSpecificCause().getMessage()));
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
+@PutMapping("/ovas")
+public ResponseEntity<Map<String, Object>> update(@Valid @RequestBody Ova ova, BindingResult result) {
+    if (result.hasErrors()) {
+        throw new ValidationException(result);
     }
+    ovaService.findById(ova.getId())
+            .orElseThrow(() -> new OvaNoEncontradoException(ova.getId()));
+    Map<String, Object> response = new HashMap<>();
+    Ova ovaActualizado = ovaService.update(ova);
+    response.put(MENSAJE, "El ova ha sido actualizado con exito!" );
+    response.put(OVA, ovaActualizado);
+    return ResponseEntity.ok(response);
+}
 
-    @DeleteMapping("/ovas")
-    public ResponseEntity<Map<String, Object>> delete(@RequestBody Ova ova) {
+@GetMapping("/ovas/{id}")
+public ResponseEntity<Map<String, Object>> findById(@PathVariable long id) {
+        Ova ova = ovaService.findById(id)
+                .orElseThrow(() -> new OvaNoEncontradoException(id));
         Map<String, Object> response = new HashMap<>();
-        try {
-            Ova ovaExistente = ovaService.findById(ova.getId());
-            if (ovaExistente == null) {
-               response.put(MENSAJE, "El ova ID:" + ova.getId() + " no existe en la base de datos.");
-               return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-            }
-            ovaService.delete(ova);
-            response.put(MENSAJE, "El ova ha sido eliminado con exito.");
-            return ResponseEntity.ok(response);
-        } catch (DataAccessException e) {
-            response.put(MENSAJE, "Error al eliminar el ova de la base de datos.");
-            response.put(ERROR, e.getMessage().concat(":").concat(e.getMostSpecificCause().getMessage()));
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
+        response.put(MENSAJE, "El ova ha sido encontrado con exito!" );
+        response.put(OVA, ova);
+        return ResponseEntity.ok(response);
 
-    @PutMapping("/ovas")
-    public ResponseEntity<Map<String, Object>> update(@Valid @RequestBody Ova ova, BindingResult result) {
-        Map<String, Object> response = new HashMap<>();
-
-        if (result.hasErrors()) {
-            List<String> errors = result.getFieldErrors()
-                    .stream()
-                    .map(err -> "El campo '" + err.getField() + "' " + err.getDefaultMessage())
-                    .toList();
-
-            response.put("errors", errors);
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-        }
-
-        try {
-            if (ovaService.findById(ova.getId()) == null) {
-                response.put(MENSAJE, "Error: No se pudo editar, el producto ID: " + ova.getId() + " no existe en la base de datos.");
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-            }
-
-            Ova ovaActualizado = ovaService.save(ova);
-
-            response.put(MENSAJE, "El ova ha sido actualizado con exito.");
-            response.put(OVA, ovaActualizado);
-            return ResponseEntity.ok(response);
-        } catch (DataAccessException e) {
-            response.put(MENSAJE, "Error al actualizar el ova de la base de datos.");
-            response.put(ERROR, e.getMessage().concat(":").concat(e.getMostSpecificCause().getMessage()));
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-
-    @GetMapping("/ovas/{id}")
-    public ResponseEntity<Map<String, Object>> findById(@PathVariable long id) {
-        Map<String, Object> response = new HashMap<>();
-
-        try {
-            Ova ova = ovaService.findById(id);
-            if (ova == null) {
-                response.put(MENSAJE,"El ova ID:" + id + " no existe en la base de datos.");
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-            }
-            response.put(MENSAJE, "El ova ha sido actualizado con exito!.");
-            response.put(OVA, ova);
-            return ResponseEntity.ok(response);
-        } catch (DataAccessException e) {
-            response.put(MENSAJE,"Error al consultar el ova de la base de datos.");
-            response.put(ERROR, e.getMessage().concat(":").concat(e.getMostSpecificCause().getMessage()));
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
     }
 }
 
