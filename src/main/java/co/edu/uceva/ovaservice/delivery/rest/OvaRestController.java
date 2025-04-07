@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/OvaService")
+@RequestMapping("/api/v1/ova-service")
 public class OvaRestController {
 
     // Declaramos como final el servicio para mejorar la inmutabilidad
@@ -37,7 +37,7 @@ public class OvaRestController {
     // Inyección de dependencia del servicio que proporciona servicios de CRUD
     public OvaRestController(IOvaService ovaService) {this.ovaService = ovaService;}
 
-    @GetMapping("/ova")
+    @GetMapping("/ovas")
     public ResponseEntity<Map<String, Object>> getOvas(){
         List<Ova> ovas = ovaService.findAll();
 
