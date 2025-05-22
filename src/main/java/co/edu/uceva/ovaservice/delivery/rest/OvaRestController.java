@@ -6,6 +6,7 @@ import co.edu.uceva.ovaservice.domain.exception.PaginaSinOvasException;
 import co.edu.uceva.ovaservice.domain.exception.OvaNoEncontradoException;
 import co.edu.uceva.ovaservice.domain.exception.ValidationException;
 import co.edu.uceva.ovaservice.domain.model.Ova;
+import co.edu.uceva.ovaservice.domain.services.ICursoCliente;
 import co.edu.uceva.ovaservice.domain.services.IOvaService;
 import jakarta.validation.Valid;
 import org.springframework.dao.DataAccessException;
@@ -29,13 +30,18 @@ public class OvaRestController {
     private final IOvaService ovaService;
 
     // Constantes para los mensajes de respuesta
+    private final ICursoCliente cursoCliente;
     private static final String MENSAJE = "mensaje";
     private static final String OVA = "ova";
     private static final String OVAS = "ovas";
 
 
     // Inyección de dependencia del servicio que proporciona servicios de CRUD
-    public OvaRestController(IOvaService ovaService) {this.ovaService = ovaService;}
+    public OvaRestController(IOvaService ovaService, ICursoCliente cursoCliente) {this.ovaService = ovaService;
+        this.cursoCliente = cursoCliente;
+    }
+
+
 
     @GetMapping("/ovas")
     public ResponseEntity<Map<String, Object>> getOvas(){
@@ -49,6 +55,10 @@ public class OvaRestController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/cursos")
+    public ResponseEntity<Map<String, Object>> getCursos() {
+        return cursoCliente.getCursos();
+    }
 
 
 
