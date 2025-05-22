@@ -1,9 +1,9 @@
-cursoservice:
-    url: http://${TARGET_HOST:localhost}:${TARGET_PORT:8082}
 app:
     api:
         version: v1
     version: 0.14.0
+cursoservice:
+    url: http://${TARGET_HOST:localhost}:${TARGET_PORT:8082}
 eureka:
     client:
         lease-expiration-duration-in-seconds: 30
@@ -11,7 +11,7 @@ eureka:
         service-url:
             defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:8761}/eureka/
     instance:
-      prefer-ip-address: true
+        prefer-ip-address: true
 logging:
     level:
         com:
