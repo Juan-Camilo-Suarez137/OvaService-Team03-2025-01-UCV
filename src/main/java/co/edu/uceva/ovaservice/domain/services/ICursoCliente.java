@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.cloud.openfeign.FeignClient;
 
 import java.util.Map;
-@FeignClient(name = "curso-service")
+@FeignClient(name = "curso-service", url = "http://api.mewings.joptionpane.software")
 public interface ICursoCliente {
     @GetMapping("api/v1/curso-service/cursos")
     ResponseEntity<Map<String, Object>> getCursos() ;
